@@ -30,10 +30,77 @@ RD 在原理上类似于 Mk，但它的作用效果来自每期平均值，而�
 
 MPI 由六项指标组成。首先是留存利润，留存利润即每期利润之和，利润由销售额减去各项成本组成，但不包括 CI（CI 通过折旧，分摊计入各期成本），存货的生产成本也不计入当期成本。通常情况下留存利润是 MPI 的决定性因素，获得显著多余其他玩家的利润即可在 MESE 中取得第一，但在竞争激烈的情况下，其它 MPI 指标会起到重要作用。
 
-然后是五项较小的指标。其中两项是与历史积累有关的指标，其一是历史累积的 Mk 和 RD 投入之和，另一是总生产能力。第三项是开工率，越接近平衡开工率指标越高，这意味着最后一期我们通常不会 0 开工。第四项是销售量，即当期卖出了多少产品。第五项是增长率，将本期与上期销量相除而得。
+然后是五项较小的指标。第一、二项是与历史积累有关的指标，第一项是历史累积的 Mk 和 RD 投入之和，第二项是总生产能力。这两项指标由玩家的决策框架决定，一般不需要额外考虑。第三项是开工率，越接近平衡开工率指标越高，这意味着最后一期我们通常不会 0 开工。第四、五项是与最后一期的表现直接有关的指标，第四项是销售量，即当期卖出了多少产品。第五项是增长率，将本期与上期销量相除而得。在利润影响不大的情况下，最后一期可以适当降低价格、增加销量，来提高 MPI。
 
 2 报表
 ---
+
+### 2.1 报表结构
+
+MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。
+
+以 MESE 的报表为例，公司报表长这样：
+
+    Income Statement            % Sales  Operations Reports
+    ----------------            -------  ------------------
+    Sales              $  15750    100%  Decisions: Price      $    30
+    COGS               $  -9634     61%             Production     525 units
+                      --------- -------             Marketing  $  1400
+    Gross Margin       $   6116     39%             Investment $  1400
+    Marketing          $  -1400      9%             R & D      $   525
+    Depreciation       $  -1400      9%
+    R & D              $   -525      3%
+    Layoff Charge      $      0      0%  Production Report:
+    Inventory Charge   $      0      0%  Production                525 units
+    Interest           $   -199      1%  Factory Capacity          700 units
+                      --------- -------  Capacity Utilization       75 %
+    Profit before Tax  $   2592     16%  Production Cost/Unit  $ 18.35
+    Tax                $   -648      4%  Inventory                   0 units
+                      --------- -------  Employees                 105 workers
+    Net Profit         $   1944     12%
+
+    Balance Sheet               % Total  Marketing Report:
+    -------------               -------  Orders Received           525 units
+    Cash               $  13503     33%  Sales Made                525 units
+    Inventory          $      0      0%  Unfilled Orders             0 units
+    Capital Investment $  28000     67%  Price/Unit Sold       $ 30.00
+                      --------- -------  Total Cost/Unit Sold  $ 25.06
+    Total Assets       $  41503    100%  Margin/Unit Sold      $  4.94
+
+    Loans              $   7254     17%  Investment Report:
+    Retained Earnings  $   3799      9%  Factory Size     $  28000     700 units
+    Capital            $  30450     73%  Net Investment   $      0       0 units
+                      --------- -------                   --------- ------
+    Liabilities+Equity $  41503    100%  Size Next Period $  28000     700 units
+
+行业报表长这样：
+
+    Units                       Change    Dollars                         Change
+    -----                       ------    -------                         ------
+    Total Orders        3150        0%    Industry Sales         $ 94500      0%
+    Total Produced      3150        0%    Average Price          $ 30.00      0%
+    Total Sold          3150        0%    Total Production       $ 57802      0%
+    Total Capacity      4200        0%    Avg Pdtn Cost          $ 18.35      0%
+    Inventory              0        0%    Avg Total Cost         $ 25.06      0%
+
+    Productivity                Change    Dollars                         Change
+    ------------                ------    -------                         ------
+    Employment           630        0%    Prime Rate                 10%      0%
+    Sales/Employee  $    150        0%    Loan Limit             $ 50000      0%
+    Units/Employee      5.00        0%    Tax Rate                   25%      0%
+    Cap. Investment $ 168000        0%    Tax Paid in Period     $  3888      5%
+    Capacity Util.       75%        0%    Tax Paid to Date       $  7596    105%
+
+           PLAYER 1 PLAYER 2 PLAYER 3 PLAYER 4 PLAYER 5 PLAYER 6
+           -------- -------- -------- -------- -------- --------
+    Sales   $ 15750  $ 15750  $ 15750  $ 15750  $ 15750  $ 15750
+    Profit  $  1944  $  1944  $  1944  $  1944  $  1944  $  1944
+    Price   $    30  $    30  $    30  $    30  $    30  $    30
+    RetErn  $  3799  $  3799  $  3799  $  3799  $  3799  $  3799
+    Un Shr      17%      17%      17%      17%      17%      17%
+    MPI         101      101      101      101      101      101
+
+下面，我们分块来看。
 
 3 决策流程
 ---
