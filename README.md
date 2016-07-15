@@ -37,7 +37,7 @@ MPI 由六项指标组成。首先是留存利润，留存利润即每期利润�
 
 ### 2.1 报表结构
 
-MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。
+MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。MESE 的公司、行业报表可以分别打印，也可以以上下结构排列在一张纸内。MESE-Next 比较特殊，公司和行业报表是列在同一个界面内的，分别用 You 和 Average 标出。
 
 以 MESE 的报表为例，公司报表长这样：
 
@@ -101,6 +101,76 @@ MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管�
     MPI         101      101      101      101      101      101
 
 下面，我们分块来看。
+
+### 2.2 生产与销售
+
+公司生产与产能状况：
+
+    Production Report:
+    Production                525 units
+    Factory Capacity          700 units
+    Capacity Utilization       75 %
+    Production Cost/Unit  $ 18.35
+    Inventory                   0 units
+    Employees                 105 workers
+
+    Investment Report:
+    Factory Size     $  28000     700 units
+    Net Investment   $      0       0 units
+                     --------- ------
+    Size Next Period $  28000     700 units
+
+Production 和 Factory Capacity 分别是生产量和生产能力，将它们相除即可得到开工率。Production Cost/Unit 即每个产品平均的生产成本，在 MESE-Next 中，还有一项边际成本，指的是多生产一件产品会增加的额外生产成本。当开工率为 80% 时，平均生产成本等于边际成本，这是最省钱的生产方式。但在早期，公司的生产能力往往不足，往往需要更高的开工率来弥补。接下来是库存，有库存意味着之前生产的产品没有售罄。最后一项是公司的雇员数，它与开工率有关。
+
+Net Investment 表示 CI 减去折旧的值，也就是新增的生产能力。这张报表中 CI 恰好与折旧相等，所以新的一期里，产能并没有发生变化。
+
+公司销售状况：
+
+    Marketing Report:
+    Orders Received           525 units
+    Sales Made                525 units
+    Unfilled Orders             0 units
+    Price/Unit Sold       $ 30.00
+    Total Cost/Unit Sold  $ 25.06
+    Margin/Unit Sold      $  4.94
+
+公司的客户会向公司订货，即 Orders，如果公司的生产量和之前的库存之和足够多，就能满足全部订单，并留下更多库存（就是上面的 Inventory 项）。但如果没有足够的产品可供出售，就会引发 Unfilled Orders，俗称 UFO。库存和 UFO 是供需不平衡的两面，太多库存意味着产能过剩或者销路不畅，而 UFO 正好相反。但需要注意，脱销并不是好事，而是意味着赚少了：公司的产品本可以卖得更贵，或者投入更少 Mk 和 RD。之后是价格、平均花费和利润，价格减去花费得到利润，这很好理解。
+
+行业数据与公司的数据对应，不再赘述：
+
+    Units                       Change
+    -----                       ------
+    Total Orders        3150        0%
+    Total Produced      3150        0%
+    Total Sold          3150        0%
+    Total Capacity      4200        0%
+    Inventory              0        0%
+
+    Productivity                Change
+    ------------                ------
+    Employment           630        0%
+    Sales/Employee  $    150        0%
+    Units/Employee      5.00        0%
+    Cap. Investment $ 168000        0%
+    Capacity Util.       75%        0%
+
+MESE-Next 中，这些数据用 Production 和 Units 来表示：
+
+    Production           You   Average
+    Prod rate            0.8
+    Unit prod cost        18        18
+    Marginal cost         18
+    Total prod cost     7560      7560
+
+    Units                You   Average
+    Orders               420       420
+    Units sold           420       420
+    Inventory              0         0
+    Unfilled               0         0
+
+### 2.3 资金与利润
+
+### 2.4 其它信息
 
 3 决策流程
 ---
