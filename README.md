@@ -120,7 +120,7 @@ MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管�
                      --------- ------
     Size Next Period $  28000     700 units
 
-Production 和 Factory Capacity 分别是产量和产能，将它们相除即可得到开工率。Production Cost/Unit 即每个产品平均的生产成本，在 MESE-Next 中，还有一项边际成本，指的是多生产一件产品会增加的额外生产成本。当开工率为 80% 时，平均生产成本等于边际成本，这是最省钱的生产方式。但在早期，公司的产能往往不足，往往需要更高的开工率来弥补。接下来是库存，有库存意味着之前生产的产品没有售罄。最后一项是公司的雇员数，它与开工率有关。
+Production 和 Factory Capacity 分别是产量和产能，将它们相除即可得到开工率。Production Cost/Unit 即每个产品平均的生产成本，在 MESE-Next 中，还有一项边际成本，指的是多生产一件产品会增加的额外生产成本。当开工率为 80% 时，平均生产成本等于边际成本，这是最省钱的生产方式，例如上面的报表中，如果生产 700 的 80%，即 560 个，平均生产成本可以降到 18。但在早期，公司的产能不足，往往需要更高的开工率来弥补。接下来是库存，有库存意味着之前生产的产品没有售罄。最后一项是公司的雇员数，它与开工率有关。
 
 Net Investment 表示 CI 减去折旧的值，也就是新增的产能。这张报表中 CI 恰好与折旧相等，所以新的一期里，产能并没有发生变化。
 
@@ -134,7 +134,7 @@ Net Investment 表示 CI 减去折旧的值，也就是新增的产能。这张�
     Total Cost/Unit Sold  $ 25.06
     Margin/Unit Sold      $  4.94
 
-公司的客户会向公司订货，即 Orders，如果公司的产量和之前的库存之和足够多，就能满足全部订单，并留下更多库存（就是上面的 Inventory 项）。但如果没有足够的产品可供出售，就会引发 Unfilled Orders，俗称 UFO。库存和 UFO 是供需不平衡的两面，太多库存意味着产能过剩或者销路不畅，而 UFO 正好相反。但需要注意，脱销并不是好事，而是意味着赚少了：公司的产品本可以卖得更贵，或者投入更少 Mk 和 RD。之后是价格、平均花费和利润，价格减去花费得到利润，这很好理解。
+公司的客户会向公司订货，即 Orders，如果公司的产量和之前一期的库存之和足够多，就能满足全部订单，并留下更多库存（就是上面的 Inventory 项）。但如果没有足够的产品可供出售，就会引发 Unfilled Orders，俗称 UFO。库存和 UFO 是供需不平衡的两面，太多库存意味着产能过剩或者销路不畅，而 UFO 正好相反。但需要注意，脱销并不是好事，而是意味着赚少了：公司的产品本可以卖得更贵，或者投入更少 Mk 和 RD。之后是价格、平均花费和利润，价格减去花费得到利润，这很好理解。
 
 行业数据与公司的数据对应，不再赘述：
 
@@ -174,6 +174,100 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
     Size                 525       525
 
 ### 2.3 资金与利润
+
+收支表，这张表本质上是从 Sales 开始向下做加减法，最终算出利润：
+
+    Income Statement            % Sales
+    ----------------            -------
+    Sales              $  15750    100%
+    COGS               $  -9634     61%
+                      --------- -------
+    Gross Margin       $   6116     39%
+    Marketing          $  -1400      9%
+    Depreciation       $  -1400      9%
+    R & D              $   -525      3%
+    Layoff Charge      $      0      0%
+    Inventory Charge   $      0      0%
+    Interest           $   -199      1%
+                      --------- -------
+    Profit before Tax  $   2592     16%
+    Tax                $   -648      4%
+                      --------- -------
+    Net Profit         $   1944     12%
+
+首先是 Sales，即总销售额，销量和单价的乘积。COGS 是售出产品的生产成本，MESE 对 COGS 的计算采用加权分摊的策略，假定存货和新生产的产品按相同的比率出货，假设现在有 500 个存货，产量 1000，销量 1200，那么存货和新品分别出货 400 和 800，100 原有存货和 200 的新品组成新一期的存货。Sales 和 COGS 相减得到毛利润。之后是各项花费，可以看到 Mk 和 RD 直接计入了成本，而 CI 是按一定比例折旧计入的。Layoff Charge 是当雇员数减少时产生的裁员费。Inventory Charge 是存货费，取连续两期中存货量的较小值来计算，例如上期存 100，本期存 200，则按 100 个存货来计价。公司持有的现金和背负的贷款会产生利息。以上共同计算得到税前利润，扣除固定税率的税之后就得到公司的利润了。
+
+资金平衡表：
+
+    Balance Sheet               % Total
+    -------------               -------
+    Cash               $  13503     33%
+    Inventory          $      0      0%
+    Capital Investment $  28000     67%
+                      --------- -------
+    Total Assets       $  41503    100%
+
+    Loans              $   7254     17%
+    Retained Earnings  $   3799      9%
+    Capital            $  30450     73%
+                      --------- -------
+    Liabilities+Equity $  41503    100%
+
+上半块的三项依次为现金、存货生产成本和总 CI。每期中，存货生产成本中会去掉已经出货的，并加上新加入库存的。类似地，总 CI 会去掉折旧，并加上新投入的 CI。
+
+下半块的三项依次是贷款、留存利润和初始资本（是一个固定值）。一个看上去巧合的现象是，上三项之和等于下三项之和，但这实际上是 MESE 资金流的本质所决定的：一个公司的收入不是以现金存在，就是以实物存在，再不然就是还了贷款，不会凭空出现也不会凭空消失。
+
+行业数据：
+
+    Dollars                         Change
+    -------                         ------
+    Industry Sales         $ 94500      0%
+    Average Price          $ 30.00      0%
+    Total Production       $ 57802      0%
+    Avg Pdtn Cost          $ 18.35      0%
+    Avg Total Cost         $ 25.06      0%
+
+    Dollars                         Change
+    -------                         ------
+    Prime Rate                 10%      0%
+    Loan Limit             $ 50000      0%
+    Tax Rate                   25%      0%
+    Tax Paid in Period     $  3888      5%
+    Tax Paid to Date       $  7596    105%
+
+这里除了和公司数据一样的部分，还多了三项设定：Prime Rate 是参考年利率，存款和贷款利率是据此产生的。需要注意，MESE 的一期是一个季度，也就是 1/4 年。Loan Limit 是贷款限额，提交决策前需要进行一些计算，来避免贷款超限。Tax Rate 是税率。
+
+MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中：
+
+    Goods                You   Average
+    Goods                420       420
+    Cost of goods       7560
+    Ideal sales income 12600
+
+    Balance              You   Average
+    Deprecation         1050
+    Capital            21000     21000
+    Size                 525       525
+    Spending            9030
+    Early loan          7280
+    Interest            -364
+
+    Goods                You   Average
+    Cost of goods sold  7560      7560
+    Cost of inventory      0
+
+    Balance              You   Average
+    Sales income       12600     12600
+    Cost before tax    10444     10444
+    Profit before tax   2156      2156
+    Profit              1617      1617
+    Loan                7280
+    Cash               10647
+    Retained earning    1617      1617
+
+这里还多了 Goods 的概念，表示存货和新品总和。Ideal sales income 是 Goods 和价格的乘积，表示如果售罄，公司将获得多少销售额。如果这个数值明显不符合经验，意味着可能有大量的存货或者 UFO 产生。
+
+另外，MESE-Next 的报表中，设定是单列在 Settings 区域的。
 
 ### 2.4 其它信息
 
