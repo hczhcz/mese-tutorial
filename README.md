@@ -39,7 +39,9 @@ MPI 由六项指标组成。首先是留存利润，留存利润即每期利润�
 
 ### 2.1 报表结构
 
-MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。MESE 的公司、行业报表可以分别打印，也可以以上下结构排列在一张纸内。MESE-Next 比较特殊，公司和行业报表是列在同一个界面内的，分别用 You 和 Average 标出。而且，MESE-Next 的报表数据分为 Early 和 Result 两类，分别表示在期初和期末产生的数据。
+MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。MESE 的公司、行业报表可以分别打印，也可以以上下结构排列在一张纸内。
+
+JA Titan 的报表结构和 MESE 很接近，IMese 的也大同小异，只是需要注意行业报表默认显示的是平均值而不是总和。MESE-Next 比较特殊，公司和行业报表是列在同一个界面内的，分别用 You 和 Average 标出。而且，MESE-Next 的报表数据分为 Early 和 Result 两类，分别表示在期初（生产、投资阶段）和期末（销售阶段）产生的数据。对于不同之处，下文会单独指出。
 
 以 MESE 的报表为例，公司报表长这样：
 
@@ -102,7 +104,7 @@ MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管�
     Un Shr      17%      17%      17%      17%      17%      17%
     MPI         101      101      101      101      101      101
 
-下面，我们分块来看。
+MESE 的完整报表还包括现金流表和提示信息，但主要是出于教学目的，此处略过。下面，我们分块来看。
 
 ### 2.2 生产与销售
 
@@ -136,7 +138,7 @@ Net Investment 表示 CI 减去折旧的值，也就是新增的产能。这张�
     Total Cost/Unit Sold  $ 25.06
     Margin/Unit Sold      $  4.94
 
-公司的客户会向公司订货，即 Orders，如果公司的产量和之前的库存之和足够多，就能满足全部订单，并留下更多库存（就是上面的 Inventory 项）。但如果没有足够的产品可供出售，就会引发 Unfilled Orders，俗称 UFO。库存和 UFO 是供需不平衡的两面，太多库存意味着产能过剩或者销路不畅，而 UFO 正好相反。但需要注意，脱销并不是好事，而是意味着赚少了：公司的产品本可以卖得更贵，或者投入更少 Mk 和 RD。之后是价格、平均花费和利润，价格减去花费得到利润，这很好理解。
+公司的客户会向公司订货，即 Orders，如果公司的产量和之前的库存之和足够多，就能满足全部订单，并留下新的库存（就是上面的 Inventory 项）。但如果没有足够的产品可供出售，就会引发 Unfilled Orders，俗称 UFO。库存和 UFO 是供需不平衡的两面，太多库存意味着产能过剩或者销路不畅，而 UFO 正好相反。但需要注意，脱销并不是好事，而是意味着赚少了：公司的产品本可以卖得更贵，或者投入更少 Mk 和 RD。之后是价格、平均花费和利润，价格减去花费得到利润，这很好理解。
 
 行业数据与公司的数据对应，不再赘述：
 
@@ -158,22 +160,26 @@ Net Investment 表示 CI 减去折旧的值，也就是新增的产能。这张�
 
 MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分）区域中：
 
+    Early Report
+
     Production           You   Average
     Prod rate            0.8
     Unit prod cost        18        18
     Marginal cost         18
     Total prod cost     7560      7560
 
+    Balance              You   Average
+    Deprecation         1050
+    Capital            21000     21000
+    Size                 525       525
+
+    Result Report
+
     Units                You   Average
     Orders               420       420
     Units sold           420       420
     Inventory              0         0
     Unfilled               0         0
-
-    Balance              You   Average
-    Deprecation         1050
-    Capital            21000     21000
-    Size                 525       525
 
 ### 2.3 资金与利润
 
@@ -241,6 +247,8 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
 
 MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中：
 
+    Early Report
+
     Goods                You   Average
     Goods                420       420
     Cost of goods       7560
@@ -253,6 +261,8 @@ MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中�
     Spending            9030
     Early loan          7280
     Interest            -364
+
+    Result Report
 
     Goods                You   Average
     Cost of goods sold  7560      7560
@@ -271,7 +281,20 @@ MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中�
 
 另外，MESE-Next 的报表中，设定是单列在 Settings 区域的。
 
-### 2.4 其它信息
+### 2.4 玩家栏
+
+之前的例子中，MESE 的玩家栏长这样：
+
+           PLAYER 1 PLAYER 2 PLAYER 3 PLAYER 4 PLAYER 5 PLAYER 6
+           -------- -------- -------- -------- -------- --------
+    Sales   $ 15750  $ 15750  $ 15750  $ 15750  $ 15750  $ 15750
+    Profit  $  1944  $  1944  $  1944  $  1944  $  1944  $  1944
+    Price   $    30  $    30  $    30  $    30  $    30  $    30
+    RetErn  $  3799  $  3799  $  3799  $  3799  $  3799  $  3799
+    Un Shr      17%      17%      17%      17%      17%      17%
+    MPI         101      101      101      101      101      101
+
+从上到下依次是各个玩家的销售额、利润、产品价格、留存利润、市场份额和 MPI。MESE-Next 的玩家栏大同小异，少了市场份额，多了销量，以及不含税的本期花费。玩家栏是观察其他玩家的唯一窗口（两人局除外），尽管只有很少的数据，但通过合理的分析，我们可以大致计算出其他玩家的大部分报表内容，甚至推测出他们的决策，这是团队 MESE 中经常使用的技巧，称为“跟踪”。
 
 3 决策流程
 ---
