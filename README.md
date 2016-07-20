@@ -350,6 +350,42 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 
 ### 3.3 出货
 
+可供出售的产品，包括存货和新品：
+
+    goods =
+        last.inventory + decisions.prod
+    goods_cost =
+        last.goods_cost_inventory + prod_cost
+    goods_max_sales =
+        decisions.price * goods
+
+通过订单分配机制，取得订单数 orders（订单分配在后文讲解），将产品售出：
+
+    sold =
+        min(orders, goods)
+    inventory =
+        goods - sold
+    unfilled =
+        orders - sold
+
+计算售出产品和存货的生产成本，它们是从存货和新品的总生产成本中按比例分摊的：
+
+    goods_cost_sold =
+        goods_cost * sold / goods
+
+    goods_cost_inventory =
+        goods_cost - goods_cost_sold
+
+销售额，可以和 goods_max_sales 相比较：
+
+    sales =
+        decisions.price * sold
+
+存货费，默认每件的存货费为 1，按本期和上期之间存货较少的来算：
+
+    inventory_charge =
+        min(last.inventory, inventory)
+
 ### 3.4 订单分配
 
 ### 3.5 现金流
