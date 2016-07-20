@@ -126,7 +126,7 @@ MESE 的完整报表还包括现金流表和提示信息，但主要是出于教
 
 Production 和 Factory Capacity 分别是产量和产能，将它们相除即可得到开工率。Production Cost/Unit 即每个产品的生产成本，在 MESE-Next 中，还有一项边际成本，指的是多生产一件产品会增加的额外生产成本。当开工率为 80% 时，单位生产成本等于边际成本，这是最省钱的生产方式，例如上面的报表中，如果生产 700 的 80%，即 560 个，单位生产成本可以降到 18。但在早期，公司的产能不足，往往需要更高的开工率来弥补。接下来是库存，有库存意味着之前生产的产品没有售罄。最后一项是公司的雇员数，它与开工率有关。
 
-Net Investment 表示 CI 减去折旧的值，也就是新增的产能。这张报表中 CI 恰好与折旧相等，所以新的一期里，产能并没有发生变化。
+通过 Investment Report 可以看出，一个单位产能的价值等于 28000 除以 700，得 40。Net Investment 表示 CI 减去折旧的值，也就是新增的产能。这张报表中，CI 决策恰好与折旧相等，都是 1400，所以新的一期里，产能并没有发生变化。
 
 公司销售状况：
 
@@ -203,7 +203,9 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
                       --------- -------
     Net Profit         $   1944     12%
 
-首先是 Sales，即总销售额，销量和单价的乘积。COGS 是售出产品的生产成本，MESE 对 COGS 的计算采用加权分摊的策略，假定存货和新生产的产品按相同的比率出货，假设现在有 500 个存货，产量 1000，销量 1200，那么存货和新品分别出货 400 和 800，100 原有存货和 200 的新品组成新一期的存货。Sales 和 COGS 相减得到毛利润。之后是各项花费，可以看到 Mk 和 RD 直接计入了成本，而 CI 是按一定比例折旧计入的。Layoff Charge 是当雇员数减少时产生的裁员费。Inventory Charge 是存货费，取连续两期中存货量的较小值来计算，例如上期存 100，本期存 200，则按 100 个存货来计价。公司持有的现金和背负的贷款会产生利息。以上共同计算得到税前利润，扣除固定税率的税之后就得到公司的利润了。
+首先是 Sales，即总销售额，销量和单价的乘积。COGS 是售出产品的生产成本，MESE 对 COGS 的计算采用加权平均的策略，假定存货和新生产的产品按相同的比率出货。假设现在有 500 个存货，产量 1000，销量 1200，那么存货和新品分别出货 400 和 800，100 原有存货和 200 的新品组成新一期的存货。Sales 和 COGS 相减得到毛利润。
+
+之后是各项花费，可以看到 Mk 和 RD 直接计入了成本，而 CI 是应用到 Factory Size 里，然后按一定比例（每期 5%）折旧计入的。Layoff Charge 是当雇员数减少时产生的裁员费。Inventory Charge 是存货费，取连续两期中存货量的较小值来计算，例如上期存 100，本期存 200，则按 100 个存货来计价。公司持有的现金和背负的贷款会产生利息。以上共同计算得到税前利润，扣除固定税率的税之后就得到公司的利润了。
 
 资金平衡表：
 
@@ -221,7 +223,7 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
                       --------- -------
     Liabilities+Equity $  41503    100%
 
-上半块的三项依次为现金、存货生产成本和总 CI。每期中，存货生产成本中会去掉已经出货的，并加上新加入库存的。类似地，总 CI 会去掉折旧，并加上新投入的 CI。
+上半块的三项依次为现金、存货生产成本和总 CI（即是 Factory Size）。每期中，存货生产成本中会去掉 COGS，并加上新加入库存的产品的生产成本。类似地，总 CI 会去掉折旧，并加上新投入的 CI。
 
 下半块的三项依次是贷款、留存利润和初始资本（是一个固定值）。一个看上去巧合的现象是，上三项之和等于下三项之和，但这实际上是 MESE 资金流的本质所决定的：一个公司的收入不是以现金存在，就是以实物存在，再不然就是还了贷款，不会凭空出现也不会凭空消失。
 
@@ -243,7 +245,7 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
     Tax Paid in Period     $  3888      5%
     Tax Paid to Date       $  7596    105%
 
-这里除了和公司数据一样的部分，还多了三项设定：Prime Rate 是参考年利率，存款和贷款利率是据此产生的。需要注意，MESE 的一期是一个季度，也就是 1/4 年，利息应该据此计算。Loan Limit 是贷款限额，提交决策前需要进行一些计算，来避免贷款超限。Tax Rate 是税率。
+这里除了和公司数据一样的部分，还多了三项设定：Prime Rate 是参考年利率，存款和贷款利率是据此产生的，MESE 中存款的利率为贷款的一半。而在 MESE-Next 中，两个利率是独立的。需要注意，MESE 的一期是一个季度，也就是 1/4 年，利息应该据此计算。Loan Limit 是贷款限额，提交决策前需要进行一些计算，来避免贷款超限。Tax Rate 是税率。
 
 MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中：
 
@@ -312,7 +314,7 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
     prod_over =
         prod_rate - 0.8
 
-生产成本，其中 initial_capital 指初始资本，player_count 指玩家数：
+生产成本，其中 init.capital 指初始资本，player_count 指玩家数：
 
     prod_cost_factor_rate =
         69（高于平衡开工率）
@@ -320,7 +322,7 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
         63（MESE-Next）
     prod_cost_unit =
         prod_cost_factor_rate * prod_over ^ 2
-        + 15 * initial_capital / player_count / last.capital
+        + 15 * init.capital / last.capital
         + 3
     prod_cost_marginal =
         prod_cost_factor_rate * 2 * prod_rate * prod_over + prod_cost_unit
@@ -336,10 +338,21 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
     size =
         capital / 40
 
-### 3.3 订单与出货
+雇员和裁员费。裁员费的计算在 MESE 中是个经典的 bug，不扣钱反而加钱，而在 MESE-Next 中则直接取消了：
 
+    employees =
+        init.employees / init.prod_rate * prod_rate
+    unit_layoff_charge =
+        
+        0（MESE-Next）
+    layoff_charge =
+        max(last.employees - employees, 0) * unit_layoff_charge
 
-### 3.4 现金流与财务
+### 3.3 出货
+
+### 3.4 订单分配
+
+### 3.5 现金流
 
 4 决策
 ---
