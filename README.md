@@ -343,7 +343,7 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
     employees =
         init.employees / init.prod_rate * prod_rate
     unit_layoff_charge =
-        
+        10（MESE）
         0（MESE-Next）
     layoff_charge =
         max(last.employees - employees, 0) * unit_layoff_charge
