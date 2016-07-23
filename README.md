@@ -8,7 +8,7 @@ MESE 讨论新编
 
 MESE 全称 Management and Economics Simulation Exercise，最初是哈佛大学制作、用于教学的商业模拟软件。在上世纪末本世纪初，JA 组织广泛地使用这套软件来进行高中、大学经济学课程（JA Economics）教学。
 
-本文讨论的 MESE 包括最初哈佛与 JA 的 MESE，也包括 JA Titan、IMese 和 MESE-Next，这三者都是支持网上对战的 MESE 变种。在默认情况下，本文讨论 2002 年之前的 MESE，不同之处会专门指出。
+本文讨论的 MESE 包括最初哈佛与 JA 的 MESE，也包括 JA Titan、IMese 和 MESE-Next，这三者都是支持网上对战的 MESE 变种。在默认情况下，本文讨论 2002 年之前的 MESE，上述的变种和 MESE 在许多方面是相同或相似的，不同之处会专门指出。
 
 在 MESE 中，若干玩家分别组成虚拟的公司，在同一个市场中，生产并销售一种产品。MESE 是一种按期进行的模拟比赛，或者说是“回合制”的，一期代表一个季度。每一期中，玩家要阅读自己公司以及整个行业的报表，并进行决策。待所有玩家提交决策后，模拟进行到下一期。比赛最终的目标称为 MPI（MESE Performance Index），在指定的期数后，获得最高 MPI 的玩家获胜。
 
@@ -305,6 +305,8 @@ MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中�
 
 MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五项（JA Titan 六项）决策，在每期关闭之前，玩家可以修改自己的决策。在一些赛事中，如果玩家不能在规定的时间内提交决策，会使用默认决策或直接取消比赛资格。“关闭”一期，即是进行一个季度的模拟。一次模拟中会进行的操作包括生产、变更产能、分配订单、出货、计算 MPI 等，最后生成新的报表。
 
+下面描述的是 MESE 及变种的内部运行流程。JA Titan 的运行流程不详，但除了少数几个例外，推测与 MESE 相同。IMese 使用 MESE 作为运算引擎，因此与 MESE 相同，不单独列出。MESE 的运行流程并不是玩家必须了解的内容，可在之后介绍决策流程时比对参考。
+
 ### 3.2 生产与产能
 
 首先是开工率，直接将产量除以产能就可以了。注意，这里的 last.size 是报表里的 Size Next Period，而报表里的 Factory Size 是再上一期的数据：
@@ -317,8 +319,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 生产成本，其中 init.capital 指初始资本，player_count 指玩家数：
 
     prod_cost_factor_rate =
-        69（高于平衡开工率）
-        138（低于平衡开工率）
+        69（MESE 和 Titan，高于平衡开工率）
+        138（MESE 和 Titan，低于平衡开工率）
         63（MESE-Next）
     prod_cost_unit =
         prod_cost_factor_rate * prod_over ^ 2
@@ -343,7 +345,7 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
     employees =
         init.employees / init.prod_rate * prod_rate
     unit_layoff_charge =
-        10（MESE）
+        10（MESE 和 Titan）
         0（MESE-Next）
     layoff_charge =
         max(last.employees - employees, 0) * unit_layoff_charge
@@ -384,7 +386,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 存货费，默认每件的存货费为 1，按本期和上期之间存货较少的来算：
 
     inventory_charge =
-        min(last.inventory, inventory)
+        min(last.inventory, inventory)（MESE 和 MESE-Next）
+        不明（Titan）
 
 ### 3.4 订单分配
 
