@@ -39,7 +39,7 @@ MPI 由六项指标组成。首先是留存利润，留存利润即每期利润�
 
 ### 2.1 报表结构
 
-MESE，Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。MESE 的公司、行业报表可以分别打印，也可以以上下结构排列在一张纸内。
+MESE，JA Titan，IMese，和 MESE-Next，分别有不同的报表系统，尽管结构有一定区别，但涵盖的内容大同小异。报表中有公司和行业两部分，公司报表显示玩家公司的各种数据，而行业报表会显示所有玩家数据之和或者平均值（IMese 和 MESE-Next），以及每个玩家的一小部分数据。公司报表中的数据会更完整一些，而行业报表会隐去一些各个公司的“商业机密”，需要玩家自己来分析。MESE 的公司、行业报表可以分别打印，也可以以上下结构排列在一张纸内。
 
 JA Titan 的报表结构和 MESE 很接近，IMese 的也大同小异，只是需要注意行业报表默认显示的是平均值而不是总和。MESE-Next 比较特殊，公司和行业报表是列在同一个界面内的，分别用 You 和 Average 标出。而且，MESE-Next 的报表数据分为 Early 和 Result 两类，分别表示在期初（生产、投资阶段）和期末（销售阶段）产生的数据。对于不同之处，下文会单独指出。
 
@@ -245,7 +245,7 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
     Tax Paid in Period     $  3888      5%
     Tax Paid to Date       $  7596    105%
 
-这里除了和公司数据一样的部分，还多了三项设定：Prime Rate 是参考年利率，存款和贷款利率是据此产生的，MESE 中存款的利率为贷款的一半。而在 MESE-Next 中，两个利率是独立的。需要注意，MESE 的一期是一个季度，也就是 1/4 年，利息应该据此计算。Loan Limit 是贷款限额，提交决策前需要进行一些计算，来避免贷款超限。Tax Rate 是税率。
+这里除了和公司数据一样的部分，还多了三项设定：Prime Rate 是参考年利率，存款和贷款利率是据此产生的，MESE 中存款的利率为贷款的一半。需要注意，MESE 的一期是一个季度，也就是 1/4 年，利息应该据此计算。在 MESE-Next 中，存款和贷款的利率是分别列出的，且不需要额外的计算。Loan Limit 是贷款限额，提交决策前需要算出自己将使用的贷款额度，避免贷款超限。Tax Rate 是税率。
 
 MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中：
 
@@ -319,9 +319,9 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 生产成本，其中 init.capital 指初始资本，player_count 指玩家数：
 
     prod_cost_factor_rate =
-        69（MESE 和 Titan，高于平衡开工率）
-        138（MESE 和 Titan，低于平衡开工率）
-        63（MESE-Next）
+        69 （MESE 和 Titan，高于平衡开工率）
+        138 （MESE 和 Titan，低于平衡开工率）
+        63 （MESE-Next）
     prod_cost_unit =
         prod_cost_factor_rate * prod_over ^ 2
         + 15 * init.capital / last.capital
@@ -345,8 +345,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
     employees =
         init.employees / init.prod_rate * prod_rate
     unit_layoff_charge =
-        10（MESE 和 Titan）
-        0（MESE-Next）
+        10 （MESE 和 Titan）
+        0 （MESE-Next）
     layoff_charge =
         max(last.employees - employees, 0) * unit_layoff_charge
 
@@ -386,10 +386,57 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 存货费，默认每件的存货费为 1，按本期和上期之间存货较少的来算：
 
     inventory_charge =
-        min(last.inventory, inventory)（MESE 和 MESE-Next）
-        不明（Titan）
+        min(last.inventory, inventory) （MESE 和 MESE-Next）
+        不明 （Titan）
 
 ### 3.4 订单分配
+
+MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总订单，其二是计算 share，即每家公司分得的订单。需要注意，Titan 的订单分配方式目前不明，尽管很可能与 MESE 相近。
+
+先从 demand 开始。在 MESE 中，Mk 是对竞争敏感的，当市场总 Mk 较大时，Mk 的效果相应降低。这是通过一个两段式函数实现的：
+
+    sum_mk_compressed =
+        (sum(decisions.mk) - 2 * sum(init.mk)) / 4
+        + 2 * sum(init.mk) （平均 Mk 大于 2 * init.mk）
+        sum(decisions.mk) （平均 Mk 小于 2 * init.mk）
+
+在 MESE 中，有两种不同的均价计算方式，分别是直接按价格决策平均，和按预期销量加权平均：
+
+    average_price_given =
+        sum(decisions.price) / player_count
+    average_price_planned =
+        sum(goods_max_sales) / sum(goods)
+
+将预期加权均价和上期的加权均价再按比例混合，就得到了用于订单分配的均价。其中的比例正是 demand 参数：
+
+    demand_price =
+        1 （默认值）
+    average_price_mixed =
+        demand_price * average_price_planned
+        + (1 - demand_price) * last.average_price
+
+Demand 由 Mk 和 RD 的影响因素共同构成，价格和 Mk 共同构成 Mk 因素，而不单独发挥作用：
+
+    demand_mk =
+        5.3 （MESE，默认值）
+        5 （MESE-Next，默认值）
+    demand_effect_mk =
+        demand_mk
+        * sqrt(sum_mk_compressed / sum(init.mk))
+        / (average_price_mixed / init.price)
+    demand_rd =
+        1 （默认值）
+    demand_effect_rd =
+        demand_rd
+        * (sum(history_rd) / now_period / sum(init.rd))
+
+算出预期的市场总订单数，以备之后的“瓜分”：
+
+    demand =
+        62.5 （MESE，默认值）
+        70 （MESE-Next，默认值）
+    orders_demand =
+        demand * (demand_effect_rd + demand_effect_mk)
 
 ### 3.5 现金流
 
