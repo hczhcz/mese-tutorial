@@ -374,7 +374,6 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 
     goods_cost_sold =
         goods_cost * sold / goods
-
     goods_cost_inventory =
         goods_cost - goods_cost_sold
 
@@ -437,6 +436,37 @@ Demand 由 Mk 和 RD 的影响因素共同构成，价格和 Mk 共同构成 Mk 
         70 （MESE-Next，默认值）
     orders_demand =
         demand * (demand_effect_rd + demand_effect_mk)
+
+接下来是各玩家公司的 share，即市场份额的计算。Share 由价格、Mk 和 RD 三个成分构成，其中 Mk 成分与价格仍然有关：
+
+    share_effect_price =
+        (average_price_mixed / decisions.price) ^ 3
+    share_effect_mk =
+        (decisions.mk / decisions.price) ^ 1.5
+    share_effect_rd =
+        history_rd
+
+三个 share 成分加权得到总 share。其中的权重是 MESE 最重要的设定之一，它决定了一场比赛的整体风格。常见的权重组合有：
+
+    share_price : share_mk : share_rd =
+        0.3  : 0.4 : 0.3  （MESE-Next 及 IMese 默认，343 设定）
+        0.2  : 0.5 : 0.3
+        0.25 : 0.5 : 0.25
+        0.2  : 0.6 : 0.2  （262 设定）
+        0.15 : 0.7 : 0.15 （MESE 默认）
+
+据此计算出 share。对于价格高于 40 的情况，share 还会被限制，因此 40 是 MESE 中高端与低端市场的价格分界线。最后，demand 和 share 共同产生订单数：
+
+    share =
+        share_price * share_effect_price / sum(share_effect_price)
+        + share_mk * share_effect_mk / sum(share_effect_mk)
+        + share_rd * share_effect_rd / sum(share_effect_rd)
+    share_compressed =
+        share * 40 / decisions.price （价格大于 40）
+        share （价格小于 40）
+    orders = orders_demand * share_compressed
+
+Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“点位”的概念。有经验的玩家会利用取整带来的额外订单数，创造更高的利润。另外，Mk 和 RD 的细节选项也会影响获得的订单数，但效果并不明显。
 
 ### 3.5 现金流
 
