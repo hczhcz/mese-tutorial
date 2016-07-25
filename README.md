@@ -478,6 +478,29 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
 
 ### 3.5 现金流
 
+除了价格，其它四项决策都是要花钱的。根据 MESE 现金流的逻辑，折旧是不计入花费的：
+
+    spending =
+        prod_cost + decisions.ci - deprecation + decisions.mk + decisions.rd
+
+根据花费和上一期的现金、贷款，计算得到期初贷款：
+
+    balance_early =
+        last.cash - last.loan - spending
+    loan_early =
+        - balance_early （balance_early 小于 0）
+        0 （否则）
+
+如果 loan_early 超过贷款限额，决策就会被拒绝。
+
+在 MESE 中，如果贷款还清了就计算存款利息，否则不计算存款利息、只计算贷款利息。而在 MESE-Next 中，利息是根据 balance_early 直接计算的：
+
+    interest =
+        interest_rate / 8 * last.cash （MESE 和 Titan，balance_early 大于 0）
+        interest_rate / 4 * loan_early （MESE 和 Titan，否则）
+        interest_rate_cash * balance_early （MESE-Next，balance_early 大于 0）
+        interest_rate_loan * balance_early （MESE-Next，否则）
+
 ### 3.6 MPI
 
 4 决策
