@@ -400,7 +400,7 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 
 MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总订单，其二是计算 share，即每家公司分得的订单。需要注意，Titan 的订单分配方式目前不明，尽管很可能与 MESE 相近。
 
-先从 demand 开始。在 MESE 中，Mk 是对竞争敏感的，当市场总 Mk 较大时，Mk 的效果相应降低。这是通过一个两段式函数实现的：
+先从 demand 开始。在 MESE 中，Mk 是对竞争敏感的，当市场总 Mk 较大时，Mk 的效果相应降低。这是通过一个两段式函数实现的，其中 sum 表示所有玩家数据之和：
 
     sum_mk_compressed =
         (sum(decisions.mk) - 2 * sum(init.mk)) / 4
@@ -414,6 +414,11 @@ MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总�
     average_price_planned =
         sum(goods_max_sales) / sum(goods)
 
+当然，average_price_planned 只是预计的均价。到订单分配、出货完成后，还要计算一个实际的均价：
+
+    average_price =
+        sum(sales) / sum(sold) （在每期的最后计算）
+
 将预期加权均价和上期的加权均价再按比例混合，就得到了用于订单分配的均价。其中的比例正是 demand 参数：
 
     demand_price =
@@ -422,7 +427,7 @@ MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总�
         demand_price * average_price_planned
         + (1 - demand_price) * last.average_price
 
-Demand 由 Mk 和 RD 的影响因素共同构成，价格和 Mk 共同构成 Mk 因素，而不单独发挥作用：
+Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 因素，而不单独发挥作用。RD 因素采用历史上每期投入的 RD （包括当期）的平均值来确定：
 
     demand_mk =
         5.3 （MESE，默认值）
@@ -435,7 +440,7 @@ Demand 由 Mk 和 RD 的影响因素共同构成，价格和 Mk 共同构成 Mk 
         1 （默认值）
     demand_effect_rd =
         demand_rd
-        * (sum(history_rd) / now_period / sum(init.rd))
+        * (sum(history_sum(rd)) / now_period / sum(init.rd))
 
 算出预期的市场总订单数，以备之后的“瓜分”：
 
@@ -452,7 +457,7 @@ Demand 由 Mk 和 RD 的影响因素共同构成，价格和 Mk 共同构成 Mk 
     share_effect_mk =
         (decisions.mk / decisions.price) ^ 1.5
     share_effect_rd =
-        history_rd
+        history_sum(rd)
 
 三个 share 成分加权得到总 share。其中的权重是 MESE 最重要的设定之一，它决定了一场比赛的整体风格。常见的权重组合有：
 
@@ -500,6 +505,48 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
         interest_rate / 4 * loan_early （MESE 和 Titan，否则）
         interest_rate_cash * balance_early （MESE-Next，balance_early 大于 0）
         interest_rate_loan * balance_early （MESE-Next，否则）
+
+上面的计算都发生在期初，接下来是利润以及各项期末的数据的计算。先从税前利润开始：
+
+    cost_before_tax =
+        goods_cost_sold
+        + deprecation
+        + decisions.mk + decisions.rd
+        - interest + inventory_charge + layoff_charge
+    profit_before_tax =
+        sales - cost_before_tax
+
+然后按固定比例扣税：
+
+    tax_charge =
+        tax_rate * profit_before_tax
+    profit =
+        profit_before_tax - tax_charge
+
+期末 balance，可以根据现金流计算：
+
+    balance =
+        balance_early + loan_early
+        + sales - deprecation
+        + interest - inventory_charge - layoff_charge - tax_charge
+
+也可以从利润出发，排除折算项目来计算，两种方式本质上是相同的。MESE-Next 实际使用这种计算方式：
+
+    balance =
+        last.cash - last.loan + loan_early
+        + profit - decisions.ci + deprecation + goods_cost_sold - prod_cost
+
+进一步得到期末贷款和现金：
+
+    loan =
+        max(loan_early, loan_early - balance)
+    cash =
+        max(balance, 0)
+
+留存利润即每期利润之和：
+
+    retern =
+        last.retern + profit
 
 ### 3.6 MPI
 
