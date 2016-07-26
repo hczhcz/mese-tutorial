@@ -40,7 +40,7 @@ Titan 还有第六项决策是慈善投入，这一项是教育用途的，唯�
 
 MPI 由六项指标组成。首先是留存利润，留存利润即每期利润之和，利润由销售额减去各项成本组成，但不包括 CI（CI 通过折旧，分摊计入各期成本），存货的生产成本也不计入当期成本。通常情况下留存利润是 MPI 的决定性因素，获得显著多余其他玩家的利润即可在 MESE 中取得第一，但在竞争激烈的情况下，其它 MPI 指标会起到重要作用。
 
-然后是五项较小的指标。第一、二项是与历史积累有关的指标，第一项是历史累积的 Mk 和 RD 投入之和，第二项是总产能。这两项指标由玩家的决策框架决定，一般不需要额外考虑。第三项是开工率，越接近平衡开工率指标越高，这意味着最后一期我们通常不会 0 开工。第四、五项是与最后一期的表现直接有关的指标，第四项是销售量，即当期卖出了多少产品。第五项是增长率，将本期与上期销量相除而得，但有一定上限。在利润影响不大的情况下，最后一期可以适当降低价格、增加销量，来提高 MPI。
+然后是五项较小的指标。第一、二项是与历史积累有关的指标，第一项是历史累积的 Mk 和 RD 投入之和，第二项是总产能。这两项指标由玩家的决策框架决定，一般不需要额外考虑。第三项是开工率，越接近平衡开工率指标越高，这意味着最后一期我们通常不会 0 开工。第四、五项是与最后一期的表现直接有关的指标，第四项是销量，即当期卖出了多少产品。第五项是增长率，将本期与上期销量相除而得，但有一定上限。在利润影响不大的情况下，最后一期可以适当降低价格、增加销量，来提高 MPI。
 
 2 报表
 ---
@@ -324,7 +324,7 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
     prod_over =
         prod_rate - 0.8
 
-生产成本，其中 init.capital 指初始资本，player_count 指玩家数：
+生产成本，其中 init.capital 指初始资本：
 
     prod_cost_factor_rate =
         69 （MESE 和 Titan，高于平衡开工率）
@@ -371,8 +371,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 通过订单分配机制，取得订单数 orders（订单分配在后文讲解），将产品售出：
 
     sold =
-        orders （goods 多于 orders）
-        goods （否则）
+        orders （货多于订单，有存货）
+        goods （货少于订单，售罄）
     inventory =
         goods - sold
     unfilled =
@@ -393,8 +393,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 存货费，默认每件的存货费为 1，按本期和上期之间存货较少的来算：
 
     inventory_charge =
-        last.inventory （MESE 和 MESE-Next，上期库存少于本期）
-        inventory （MESE 和 MESE-Next，否则）
+        last.inventory （MESE 和 MESE-Next，上期库存较少）
+        inventory （MESE 和 MESE-Next，本期库存较少）
         不明 （Titan）
 
 ### 3.4 订单分配
@@ -408,7 +408,7 @@ MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总�
         + 2 * sum(init.mk) （平均 Mk 大于 2 * init.mk）
         sum(decisions.mk) （否则）
 
-在 MESE 中，有两种不同的均价计算方式，分别是直接按价格决策平均，和按预期销量加权平均：
+在 MESE 中，有两种不同的均价计算方式，分别是直接按价格决策平均，和按预期销量加权平均。下面的 player_count 指玩家数：
 
     average_price_given =
         sum(decisions.price) / player_count
@@ -428,7 +428,14 @@ MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总�
         demand_price * average_price_planned
         + (1 - demand_price) * last.average_price
 
-Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 因素，而不单独发挥作用。RD 因素采用历史上每期投入的 RD（包括当期）的平均值来确定：
+记录历史上投入过的 Mk 和 RD 的总和（包括当期），以备之后使用：
+
+    history_mk =
+        last.history_mk + decisions.mk
+    history_rd =
+        last.history_rd + decisions.rd
+
+Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 因素，而不单独发挥作用。RD 因素采用历史上每期投入 RD 的平均值来确定：
 
     demand_mk =
         5.3 （MESE，默认值）
@@ -439,8 +446,6 @@ Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 
         / (average_price_mixed / init.price)
     demand_rd =
         1 （默认值）
-    history_rd =
-        last.history_rd + decisions.rd
     demand_effect_rd =
         demand_rd
         * (sum(history_rd) / now_period / sum(init.rd))
@@ -496,18 +501,18 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
     balance_early =
         last.cash - last.loan - spending
     loan_early =
-        - balance_early （balance_early 小于 0）
-        0 （否则）
+        - balance_early （balance_early 为负，需要贷款）
+        0 （balance_early 非负，现金结余）
 
 如果 loan_early 超过贷款限额，决策就会被拒绝。
 
 在 MESE 中，如果贷款还清了就计算存款利息，否则不计算存款利息、只计算贷款利息。而在 MESE-Next 中，利息是根据 balance_early 直接计算的：
 
     interest =
-        interest_rate / 8 * last.cash （MESE 和 Titan，期初没有贷款）
+        interest_rate / 8 * last.cash （MESE 和 Titan，期初现金结余）
         interest_rate / 4 * loan_early （MESE 和 Titan，期初有贷款）
-        interest_rate_cash * balance_early （MESE-Next，balance_early 大于 0）
-        interest_rate_loan * balance_early （MESE-Next，否则）
+        interest_rate_cash * balance_early （MESE-Next，期初现金结余）
+        interest_rate_loan * balance_early （MESE-Next，期初有贷款）
 
 上面的计算都发生在期初，接下来是利润以及各项期末的数据的计算。先从税前利润开始：
 
@@ -548,12 +553,50 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
         balance （期末 balance 为正）
         0 （否则）
 
-留存利润即每期利润之和：
+留存利润为每期利润之和：
 
     retern =
         last.retern + profit
 
 ### 3.6 MPI
+
+留存利润，按每期平均值计算，并且没有上限：
+
+    mpi_a =
+        50 * retern / now_period / init.retern
+
+历史投入的 Mk 和 RD 占所有玩家比例：
+
+    mpi_b =
+        10 * (history_rd + history_mk)
+        / (sum(history_rd) + sum(history_mk)) * player_count
+
+产能占所有玩家比例：
+
+    mpi_c =
+        10 * size / sum(size) * player_count
+
+开工率，每多于或少于平衡开工率十个百分点，MPI 减 1：
+
+    mpi_d =
+        10 * (1 - |prod_over|)
+
+销量占所言玩家比例：
+
+    mpi_e =
+        10 * sold / sum(sold) * player_count
+
+增长率，上限为 20。一些玩家会在最后一期大幅减价，来获得 MPI：
+
+    mpi_f =
+        10 * sold / last.sold
+        / sum(sales) * sum(last.sales) （计算结果不超过 20）
+        20 （否则）
+
+加起来就得到 MPI 总和了：
+
+    mpi =
+        mpi_a + mpi_b + mpi_c + mpi_d + mpi_e + mpi_f
 
 4 决策
 ---
