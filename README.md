@@ -438,9 +438,11 @@ Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 
         / (average_price_mixed / init.price)
     demand_rd =
         1 （默认值）
+    history_rd =
+        last.history_rd + decisions.rd
     demand_effect_rd =
         demand_rd
-        * (sum(history_sum(rd)) / now_period / sum(init.rd))
+        * (sum(history_rd) / now_period / sum(init.rd))
 
 算出预期的市场总订单数，以备之后的“瓜分”：
 
@@ -457,7 +459,7 @@ Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 
     share_effect_mk =
         (decisions.mk / decisions.price) ^ 1.5
     share_effect_rd =
-        history_sum(rd)
+        history_rd
 
 三个 share 成分加权得到总 share。其中的权重是 MESE 最重要的设定之一，它决定了一场比赛的整体风格。常见的权重组合有：
 
