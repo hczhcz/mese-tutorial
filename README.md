@@ -352,11 +352,10 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 
     employees =
         init.employees / init.prod_rate * prod_rate
-    unit_layoff_charge =
-        10 （MESE 和 Titan）
-        0 （MESE-Next）
     layoff_charge =
-        max(last.employees - employees, 0) * unit_layoff_charge
+        (last.employees - employees) * 10 （MESE 和 Titan，有裁员）
+        0 （MESE 和 Titan，无裁员）
+        0 （MESE-Next）
 
 ### 3.3 出货
 
@@ -372,7 +371,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 通过订单分配机制，取得订单数 orders（订单分配在后文讲解），将产品售出：
 
     sold =
-        min(orders, goods)
+        orders （goods 多于 orders）
+        goods （否则）
     inventory =
         goods - sold
     unfilled =
@@ -393,7 +393,8 @@ MESE 是按期运行的。每期中，玩家会先收到报表，随后提交五
 存货费，默认每件的存货费为 1，按本期和上期之间存货较少的来算：
 
     inventory_charge =
-        min(last.inventory, inventory) （MESE 和 MESE-Next）
+        last.inventory （MESE 和 MESE-Next，上期库存少于本期）
+        inventory （MESE 和 MESE-Next，否则）
         不明 （Titan）
 
 ### 3.4 订单分配
@@ -427,7 +428,7 @@ MESE 的订单分配分成两个步骤，其一是计算 demand，即市场总�
         demand_price * average_price_planned
         + (1 - demand_price) * last.average_price
 
-Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 因素，而不单独发挥作用。RD 因素采用历史上每期投入的 RD （包括当期）的平均值来确定：
+Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 因素，而不单独发挥作用。RD 因素采用历史上每期投入的 RD（包括当期）的平均值来确定：
 
     demand_mk =
         5.3 （MESE，默认值）
@@ -464,11 +465,11 @@ Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 
 三个 share 成分加权得到总 share。其中的权重是 MESE 最重要的设定之一，它决定了一场比赛的整体风格。常见的权重组合有：
 
     share_price : share_mk : share_rd =
-        0.3  : 0.4 : 0.3  （MESE-Next 及 IMese 默认，343 设定）
+        0.3  : 0.4 : 0.3  （MESE-Next 及 IMese 默认值，343 设定）
         0.2  : 0.5 : 0.3
         0.25 : 0.5 : 0.25
         0.2  : 0.6 : 0.2  （262 设定）
-        0.15 : 0.7 : 0.15 （MESE 默认）
+        0.15 : 0.7 : 0.15 （MESE 默认值）
 
 据此计算出 share。对于价格高于 40 的情况，share 还会被限制，因此 40 是 MESE 中高端与低端市场的价格分界线。最后，demand 和 share 共同产生订单数：
 
@@ -503,8 +504,8 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
 在 MESE 中，如果贷款还清了就计算存款利息，否则不计算存款利息、只计算贷款利息。而在 MESE-Next 中，利息是根据 balance_early 直接计算的：
 
     interest =
-        interest_rate / 8 * last.cash （MESE 和 Titan，balance_early 大于 0）
-        interest_rate / 4 * loan_early （MESE 和 Titan，否则）
+        interest_rate / 8 * last.cash （MESE 和 Titan，期初没有贷款）
+        interest_rate / 4 * loan_early （MESE 和 Titan，期初有贷款）
         interest_rate_cash * balance_early （MESE-Next，balance_early 大于 0）
         interest_rate_loan * balance_early （MESE-Next，否则）
 
@@ -541,9 +542,11 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
 进一步得到期末贷款和现金：
 
     loan =
-        max(loan_early, loan_early - balance)
+        loan_early （期末 balance 为正）
+        loan_early - balance （否则）
     cash =
-        max(balance, 0)
+        balance （期末 balance 为正）
+        0 （否则）
 
 留存利润即每期利润之和：
 
