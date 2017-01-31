@@ -473,7 +473,7 @@ Demand 由 Mk 和 RD 的影响因素共同构成。价格和 Mk 共同构成 Mk 
 
 三个 share 成分加权得到总 share。其中的权重是 MESE 最重要的参数之一，它决定了一场比赛的整体风格。常见的权重组合有：
 
-    share_price : share_mk : share_rd =
+    share_mk : share_price : share_rd =
         0.3  : 0.4 : 0.3  （MESE-Next 及 IMese 默认值，343 设定）
         0.2  : 0.5 : 0.3
         0.25 : 0.5 : 0.25
@@ -765,5 +765,6 @@ MESE-Realtime 中的经验对 MESE 玩家也有参考价值，例如 MESE-Realti
 修订：
 
 * [Matt](https://github.com/MateLing)
+* [mutong](https://github.com/mutongx)
 
 本文贡献者授权公众自由分发、演绎本文。本文托管于 [hczhcz/mese-tutorial](https://github.com/hczhcz/mese-tutorial)，欢迎以 Pull Request 的方式参与本文的编辑工作。
