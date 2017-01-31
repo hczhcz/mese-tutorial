@@ -179,7 +179,7 @@ MESE-Next 中，这些数据显示在 Production，Units 和 Balance（一部分
     Total prod cost     7560      7560
 
     Balance              You   Average
-    Deprecation         1050
+    Depreciation        1050
     Capital            21000     21000
     Size                 525       525
 
@@ -267,7 +267,7 @@ MESE-Next 中，这些数据显示在 Goods 和 Balance（一部分）区域中�
     Ideal sales income 12600
 
     Balance              You   Average
-    Deprecation         1050
+    Depreciation        1050
     Capital            21000     21000
     Size                 525       525
     Spending            9030
@@ -345,10 +345,10 @@ MESE 的运行流程并不是玩家必须了解的内容。但在决策过程中
 
 折旧，以及应用 CI 之后新的产能，其中每个产能单位价值为 40：
 
-    deprecation =
+    depreciation =
         0.05 * last.capital
     capital =
-        last.capital + decisions.ci - deprecation
+        last.capital + decisions.ci - depreciation
     size =
         capital / 40
 
@@ -501,7 +501,7 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
 除了价格，其它四项决策都是要花钱的。根据 MESE 现金流的逻辑，折旧是不计入花费的：
 
     spending =
-        prod_cost + decisions.ci - deprecation + decisions.mk + decisions.rd
+        prod_cost + decisions.ci - depreciation + decisions.mk + decisions.rd
 
 根据花费和上一期的现金、贷款，计算得到期初贷款：
 
@@ -525,7 +525,7 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
 
     cost_before_tax =
         goods_cost_sold
-        + deprecation
+        + depreciation
         + decisions.mk + decisions.rd
         - interest + inventory_charge + layoff_charge
     profit_before_tax =
@@ -542,14 +542,14 @@ Titan 的 share 比较特殊，在计算之后还要进行取整，因此有“�
 
     balance =
         balance_early + loan_early
-        + sales - deprecation
+        + sales - depreciation
         + interest - inventory_charge - layoff_charge - tax_charge
 
 也可以从利润出发，排除折算项目来计算，两种方式本质上是相同的。MESE-Next 实际使用这种计算方式：
 
     balance =
         last.cash - last.loan + loan_early
-        + profit - decisions.ci + deprecation + goods_cost_sold - prod_cost
+        + profit - decisions.ci + depreciation + goods_cost_sold - prod_cost
 
 进一步得到期末贷款和现金：
 
@@ -617,7 +617,7 @@ MESE 并不存在唯一正确的决策流程。考虑到比赛形式、时间限
 接下来，如果可用的现金和贷款限额有限，需要计算自己的可用资金。根据之前 loan_early 的计算公式可知，可用资金为：
 
     avaliable_fund =
-        last.cash + loan_limit - last.loan + deprecation
+        last.cash + loan_limit - last.loan + depreciation
 
 需要注意，可用资金中可以额外加上一份折旧。一个推测是，MESE 原本的设计是不允许产能减少的，即 CI 的值不能小于折旧，但由于种种原因修改成了现在这样。
 
@@ -692,7 +692,7 @@ Mk 与价格通常是共同配合的，当利润空间较大时，高价格、�
     profit =
         (
             sales - goods_cost_sold
-            - deprecation
+            - depreciation
             - decisions.mk - decisions.rd
             + interest - inventory_charge - layoff_charge
         ) * (1 - tax_rate)
